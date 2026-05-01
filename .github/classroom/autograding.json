@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "name": "t1",
+      "setup": "",
+      "run": "cd ClienteAPI && docker build -t \"apicliente\" .",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 10
+    }
+  ]
+}
