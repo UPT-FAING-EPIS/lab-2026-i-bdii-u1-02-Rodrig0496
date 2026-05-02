@@ -1,12 +1,1 @@
-{
-  "Version": 1,
-  "Hash": "hhVlRPDI6p2MlxAEJZ7st/a0hNoe33eGqc3WKd4ML44=",
-  "Source": "ClienteAPI",
-  "BasePath": "_content/ClienteAPI",
-  "Mode": "Default",
-  "ManifestType": "Build",
-  "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": [],
-  "Endpoints": []
-}
+{"Version":1,"Hash":"sBEiqOzUnS1bx1f/doVZdRy0Ep/sfVpgtuAtyIcCok0=","Source":"ClienteAPI","BasePath":"/","Mode":"Root","ManifestType":"Build","ReferencedProjectsConfiguration":[],"DiscoveryPatterns":[],"Assets":[],"Endpoints":[]}

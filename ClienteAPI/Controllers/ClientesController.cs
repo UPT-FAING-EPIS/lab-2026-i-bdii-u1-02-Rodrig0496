@@ -25,59 +25,47 @@ namespace ClienteAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Cliente>>> GetClientes()
         {
-            return await _context.Clientes.ToListAsync();
+            if (_context.Clientes == null) return NotFound();
+            // Incluimos los documentos relacionados al cliente
+            return await _context.Clientes.Include(c => c.ClientesDocumentos).ToListAsync();
         }
 
         // GET: api/Clientes/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Cliente>> GetCliente(int id)
         {
-            var cliente = await _context.Clientes.FindAsync(id);
+            if (_context.Clientes == null) return NotFound();
+            var cliente = await _context.Clientes
+                                        .Include(c => c.ClientesDocumentos)
+                                        .FirstOrDefaultAsync(c => c.IdCliente == id);
 
-            if (cliente == null)
-            {
-                return NotFound();
-            }
-
+            if (cliente == null) return NotFound();
             return cliente;
         }
 
         // PUT: api/Clientes/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCliente(int id, Cliente cliente)
         {
-            if (id != cliente.IdCliente)
-            {
-                return BadRequest();
-            }
+            if (id != cliente.IdCliente) return BadRequest();
 
             _context.Entry(cliente).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
+            try { await _context.SaveChangesAsync(); }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ClienteExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                if (!ClienteExists(id)) return NotFound();
+                else throw;
             }
-
             return NoContent();
         }
 
         // POST: api/Clientes
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Cliente>> PostCliente(Cliente cliente)
         {
+            if (_context.Clientes == null) return Problem("Entity set 'BdClientesContext.Clientes' is null.");
+            
             _context.Clientes.Add(cliente);
             await _context.SaveChangesAsync();
 
@@ -88,11 +76,9 @@ namespace ClienteAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCliente(int id)
         {
+            if (_context.Clientes == null) return NotFound();
             var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
+            if (cliente == null) return NotFound();
 
             _context.Clientes.Remove(cliente);
             await _context.SaveChangesAsync();
@@ -102,7 +88,7 @@ namespace ClienteAPI.Controllers
 
         private bool ClienteExists(int id)
         {
-            return _context.Clientes.Any(e => e.IdCliente == id);
+            return (_context.Clientes?.Any(e => e.IdCliente == id)).GetValueOrDefault();
         }
     }
 }

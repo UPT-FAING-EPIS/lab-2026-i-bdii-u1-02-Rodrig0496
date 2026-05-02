@@ -25,88 +25,70 @@ namespace ClienteAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ClientesDocumento>>> GetClientesDocumentos()
         {
+            if (_context.ClientesDocumentos == null) return NotFound();
             return await _context.ClientesDocumentos.ToListAsync();
         }
 
-        // GET: api/ClientesDocumentos/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ClientesDocumento>> GetClientesDocumento(int id)
+        // GET: api/ClientesDocumentos/5/1  (idCliente / idTipoDocumento)
+        [HttpGet("{idCliente}/{idTipoDocumento}")]
+        public async Task<ActionResult<ClientesDocumento>> GetClientesDocumento(int idCliente, byte idTipoDocumento)
         {
-            var clientesDocumento = await _context.ClientesDocumentos.FindAsync(id);
+            if (_context.ClientesDocumentos == null) return NotFound();
+            
+            // Buscar usando la llave primaria compuesta
+            var clientesDocumento = await _context.ClientesDocumentos.FindAsync(idCliente, idTipoDocumento);
 
-            if (clientesDocumento == null)
-            {
-                return NotFound();
-            }
-
+            if (clientesDocumento == null) return NotFound();
             return clientesDocumento;
         }
 
-        // PUT: api/ClientesDocumentos/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutClientesDocumento(int id, ClientesDocumento clientesDocumento)
+        // PUT: api/ClientesDocumentos/5/1
+        [HttpPut("{idCliente}/{idTipoDocumento}")]
+        public async Task<IActionResult> PutClientesDocumento(int idCliente, byte idTipoDocumento, ClientesDocumento clientesDocumento)
         {
-            if (id != clientesDocumento.IdCliente)
+            if (idCliente != clientesDocumento.IdCliente || idTipoDocumento != clientesDocumento.IdTipoDocumento)
             {
                 return BadRequest();
             }
 
             _context.Entry(clientesDocumento).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
+            try { await _context.SaveChangesAsync(); }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ClientesDocumentoExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                if (!ClientesDocumentoExists(idCliente, idTipoDocumento)) return NotFound();
+                else throw;
             }
-
             return NoContent();
         }
 
         // POST: api/ClientesDocumentos
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<ClientesDocumento>> PostClientesDocumento(ClientesDocumento clientesDocumento)
         {
+            if (_context.ClientesDocumentos == null) return Problem("Entity set 'BdClientesContext.ClientesDocumentos' is null.");
+            
             _context.ClientesDocumentos.Add(clientesDocumento);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
+            try { await _context.SaveChangesAsync(); }
             catch (DbUpdateException)
             {
-                if (ClientesDocumentoExists(clientesDocumento.IdCliente))
+                if (ClientesDocumentoExists(clientesDocumento.IdCliente, clientesDocumento.IdTipoDocumento))
                 {
                     return Conflict();
                 }
-                else
-                {
-                    throw;
-                }
+                else throw;
             }
 
-            return CreatedAtAction("GetClientesDocumento", new { id = clientesDocumento.IdCliente }, clientesDocumento);
+            return CreatedAtAction("GetClientesDocumento", new { idCliente = clientesDocumento.IdCliente, idTipoDocumento = clientesDocumento.IdTipoDocumento }, clientesDocumento);
         }
 
-        // DELETE: api/ClientesDocumentos/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteClientesDocumento(int id)
+        // DELETE: api/ClientesDocumentos/5/1
+        [HttpDelete("{idCliente}/{idTipoDocumento}")]
+        public async Task<IActionResult> DeleteClientesDocumento(int idCliente, byte idTipoDocumento)
         {
-            var clientesDocumento = await _context.ClientesDocumentos.FindAsync(id);
-            if (clientesDocumento == null)
-            {
-                return NotFound();
-            }
+            if (_context.ClientesDocumentos == null) return NotFound();
+            var clientesDocumento = await _context.ClientesDocumentos.FindAsync(idCliente, idTipoDocumento);
+            if (clientesDocumento == null) return NotFound();
 
             _context.ClientesDocumentos.Remove(clientesDocumento);
             await _context.SaveChangesAsync();
@@ -114,9 +96,9 @@ namespace ClienteAPI.Controllers
             return NoContent();
         }
 
-        private bool ClientesDocumentoExists(int id)
+        private bool ClientesDocumentoExists(int idCliente, byte idTipoDocumento)
         {
-            return _context.ClientesDocumentos.Any(e => e.IdCliente == id);
+            return (_context.ClientesDocumentos?.Any(e => e.IdCliente == idCliente && e.IdTipoDocumento == idTipoDocumento)).GetValueOrDefault();
         }
     }
 }
